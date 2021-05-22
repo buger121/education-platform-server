@@ -102,6 +102,67 @@ const user = {
         const res = await dbUtils.query(_sql);
         return res;
     },
+
+    async getCourse(userId) {
+        const _sql1 = `
+        SELECT course FROM user_info WHERE id = ${userId}
+        `;
+        const res = await dbUtils.query(_sql1);
+        let courseArr = [];
+        if (res[0].course) {
+            courseArr = res[0].course.split(',');
+        }
+        const _sql2 = `
+        SELECT * FROM course_detail WHERE course_id in (${courseArr})
+        `;
+        const courseData = await dbUtils.query(_sql2);
+        return courseData;
+    },
+
+    async getCollectCourse(userId) {
+        const _sql1 = `
+        SELECT collect FROM user_info WHERE id = ${userId}
+        `;
+        const res = await dbUtils.query(_sql1);
+        let courseArr = [];
+        if (res[0].collect) {
+            courseArr = res[0].collect.split(',');
+        }
+        const _sql2 = `
+        SELECT * FROM course_detail WHERE course_id in (${courseArr})
+        `;
+        const courseData = await dbUtils.query(_sql2);
+        return courseData;
+    },
+
+    async getInteractive(userId) {
+        const _sql = `
+        SELECT * FROM user_interactive inte, course_discuss disc
+        WHERE inte.discussId = disc.discussID AND disc.userId = ${userId}
+        `;
+        let replyedInfoArr = [];
+        try {
+            replyedInfoArr = await dbUtils.query(_sql);
+        } catch (err) {
+            console.log(err);
+        }
+        return replyedInfoArr;
+    },
+
+    async readMessage(userId) {
+        const value = { viewed: 0 };
+        const _sql = `
+        UPDATE ?? SET ? WHERE receiveUser = ?
+        `;
+        await dbUtils.query(_sql, ['user_interactive', value, userId]);
+        return {
+            success: true,
+        };
+    },
+
+    async addMessage(addData) {
+        await dbUtils.insertData('user_interactive', addData);
+    },
 };
 
 module.exports = user;

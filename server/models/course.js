@@ -1,5 +1,6 @@
 const dbUtils = require('./../utils/db-util');
 const moment = require('moment');
+const { max } = require('moment');
 
 const course = {
     async getCourseList() {
@@ -76,7 +77,9 @@ const course = {
         `;
         const oldCourse = await this.getCourseIdByUserId(userId);
         let oldCourseArr = [];
-        oldCourseArr = oldCourse[0].course.split(',');
+        if (oldCourse[0].course) {
+            oldCourseArr = oldCourse[0].course.split(',');
+        }
         oldCourseArr.push(courseId);
         const newCourse = oldCourseArr.join(',');
         try {
@@ -118,6 +121,17 @@ const course = {
         `;
         const comment = await dbUtils.query(_sql3);
         return { catalog, progress, comment };
+    },
+
+    async collectCourse(userId, updateVal) {
+        const result = {
+            success: false,
+        };
+        const res = await dbUtils.updateData('user_info', updateVal, userId);
+        if (res.affectedRows === 1) {
+            result.success = true;
+        }
+        return result;
     },
 
     async releaseComment(commentData) {
@@ -167,12 +181,135 @@ const course = {
         return res;
     },
 
+    async getDiscussData(courseId) {
+        const _sql = `
+        SELECT * FROM course_discuss WHERE courseId = ${courseId}
+        `;
+        const res = await dbUtils.query(_sql);
+        return res;
+    },
+
+    async getDiscussItem(discussId) {
+        const _sql = `
+        SELECT * FROM course_discuss WHERE discussId = ${discussId}
+        `;
+        const res = await dbUtils.query(_sql);
+        return res;
+    },
+
+    async addDiscuss(discussData) {
+        const result = {
+            success: false,
+        };
+        const res = await dbUtils.insertData('course_discuss', discussData);
+        if (res.affectedRows === 1) {
+            result.success = true;
+        }
+        //获取刚插入的discussId
+        const _sql = `
+        SELECT max(discussId) AS maxId FROM course_discuss
+        `;
+        const maxIdItem = await dbUtils.query(_sql);
+        result.maxId = maxIdItem[0].maxId;
+        return result;
+    },
+
+    async updateDiscuss(params) {
+        const result = {
+            success: false,
+        };
+        const _sql1 = `
+        SELECT * FROM course_discuss WHERE discussId = ${params.discussId}
+        `;
+        const discussData = await dbUtils.query(_sql1);
+        const likes = discussData[0].like.split(',');
+        switch (params.attr) {
+            case 'like':
+                //修改点赞
+                const index = likes.indexOf(String(params.userId));
+                if (index !== -1) {
+                    likes.splice(index, 1);
+                } else {
+                    likes.push(String(params.userId));
+                }
+                discussData[0].like = likes.join(',');
+                break;
+            case 'reply':
+                //添加回复id
+                if (discussData[0].reply) {
+                    discussData[0].reply =
+                        discussData[0].reply + ',' + params.addReplyId;
+                } else {
+                    discussData[0].reply = params.addReplyId;
+                }
+                break;
+        }
+        const _sql2 = 'UPDATE ?? SET ? WHERE discussId = ?';
+        const res = await dbUtils.query(_sql2, [
+            'course_discuss',
+            discussData[0],
+            params.discussId,
+        ]);
+        if (res.affectedRows === 1) {
+            result.success = true;
+        }
+        return result;
+    },
+
+    async updateSpecficDiscuss(newDiscuss) {
+        let _sql = 'UPDATE ?? SET ? WHERE discussId = ?';
+        await dbUtils.query(_sql, [
+            'course_discuss',
+            newDiscuss,
+            newDiscuss.discussId,
+        ]);
+    },
+
+    async deleteDiscuss(discussId) {
+        let result = {
+            success: false,
+        };
+        //删除评论记录
+        const _sql = `
+        DELETE FROM course_discuss WHERE discussId in (${discussId})
+        `;
+        //删除交互表中相关的记录
+        const _sql2 = `
+        DELETE FROM user_interactive WHERE discussId in (${discussId})
+        `;
+        const res = await dbUtils.query(_sql);
+        await dbUtils.query(_sql2);
+        if (res.affectedRows >= 1) {
+            result.success = true;
+        }
+        return result;
+    },
+
     async getTestData(lessonId) {
         const _sql = `
         SELECT * FROM lesson_test WHERE lessonId = ${lessonId}
         `;
         const res = await dbUtils.query(_sql);
         return res;
+    },
+
+    async getDanMuByLessonId(lessonId) {
+        const _sql = `
+        SELECT * FROM lesson_danmu WHERE lessonId = ${lessonId}
+        `;
+        const res = await dbUtils.query(_sql);
+        return res;
+    },
+
+    async addDanMu(danMuData) {
+        const result = {
+            success: false,
+        };
+        const res = await dbUtils.insertData('lesson_danmu', danMuData);
+        if (res.affectedRows == 1) {
+            result.success = true;
+        }
+        return result;
     },
 };
 

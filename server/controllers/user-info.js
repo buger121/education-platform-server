@@ -168,4 +168,28 @@ module.exports = {
         const res = await userInfoService.getOrders(userId);
         ctx.body = res;
     },
+
+    async getCourse(ctx) {
+        const userId = getUserId(ctx);
+        const res = await userInfoService.getCourse(userId);
+        ctx.body = res;
+    },
+
+    async getCollectCourse(ctx) {
+        const userId = getUserId(ctx);
+        const res = await userInfoService.getCollectCourse(userId);
+        ctx.body = res;
+    },
+
+    async getInteractive(ctx) {
+        const userId = getUserId(ctx);
+        const res = await userInfoService.getInteractive(userId);
+        ctx.body = res;
+    },
+
+    async readMessage(ctx) {
+        const userId = getUserId(ctx);
+        const res = await userInfoService.readMessage(userId);
+        ctx.body = res;
+    },
 };

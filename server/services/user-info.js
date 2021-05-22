@@ -72,6 +72,26 @@ const user = {
         return result;
     },
 
+    async getCourse(userId) {
+        const result = await userModel.getCourse(userId);
+        return result;
+    },
+
+    async getCollectCourse(userId) {
+        const result = await userModel.getCollectCourse(userId);
+        return result;
+    },
+
+    async getInteractive(userId) {
+        const result = await userModel.getInteractive(userId);
+        return result;
+    },
+
+    async readMessage(userId) {
+        const result = await userModel.readMessage(userId);
+        return result;
+    },
+
     validatorSignUp(userInfo) {
         let result = {
             success: false,

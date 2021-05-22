@@ -58,6 +58,13 @@ module.exports = {
         ctx.body = res;
     },
 
+    async collectCourse(ctx) {
+        const userId = getUserId(ctx);
+        const courseId = ctx.request.body.courseId;
+        const res = await courseService.collectCourse(userId, courseId);
+        ctx.body = res;
+    },
+
     async releaseComment(ctx) {
         const commentData = ctx.request.body;
         const res = await courseService.releaseComment(commentData);
@@ -68,6 +75,39 @@ module.exports = {
         const userId = getUserId(ctx);
         const courseId = Number(ctx.query.courseId);
         const res = await courseService.getCourseNotes(userId, courseId);
+        ctx.body = res;
+    },
+
+    async getDiscussData(ctx) {
+        const courseId = Number(ctx.query.courseId);
+        const res = await courseService.getDiscussData(courseId);
+        ctx.body = res;
+    },
+
+    async getDiscussItem(ctx) {
+        const discussId = Number(ctx.query.discussId);
+        const res = await courseService.getDiscussItem(discussId);
+        ctx.body = res;
+    },
+
+    async addDiscuss(ctx) {
+        const userId = getUserId(ctx);
+        const discussData = ctx.request.body;
+        const res = await courseService.addDiscuss({ userId, ...discussData });
+        ctx.body = res;
+    },
+
+    async updateDiscuss(ctx) {
+        const userId = getUserId(ctx);
+        const params = ctx.request.body;
+        params.userId = userId;
+        const res = await courseService.updateDiscuss(params);
+        ctx.body = res;
+    },
+
+    async deleteDiscuss(ctx) {
+        const discussId = ctx.query.discussId;
+        const res = await courseService.deleteDiscuss(discussId);
         ctx.body = res;
     },
 
@@ -90,6 +130,18 @@ module.exports = {
             userId,
             answers,
         });
+        ctx.body = res;
+    },
+
+    async getDanMuByLessonId(ctx) {
+        const lessonId = Number(ctx.query.lessonId);
+        const res = await courseService.getDanMuByLessonId(lessonId);
+        ctx.body = res;
+    },
+
+    async addDanMu(ctx) {
+        const danMuData = ctx.request.body;
+        const res = await courseService.addDanMu(danMuData);
         ctx.body = res;
     },
 };

@@ -6,6 +6,10 @@ const routers = router
     .post('/user/updateUserInfo', userInfoController.updateUserInfo)
     .post('/user/signIn', userInfoController.singIn)
     .post('/user/signUp', userInfoController.signUp)
-    .get('/user/orders', userInfoController.getOrders);
+    .get('/user/orders', userInfoController.getOrders)
+    .get('/user/courses', userInfoController.getCourse)
+    .get('/user/collects', userInfoController.getCollectCourse)
+    .get('/user/interactive', userInfoController.getInteractive)
+    .post('/user/readMessage', userInfoController.readMessage);
 
 module.exports = routers;
